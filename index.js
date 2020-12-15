@@ -11,8 +11,8 @@ new fullpage('#fullpage', {
 document.body.addEventListener('dragstart', event => event.preventDefault())
 window.addEventListener('resize', resizeCanvas, false)
 
-var canvas = document.getElementById('canvas')
-var ctx = canvas.getContext('2d')
+canvas = document.getElementById('canvas')
+ctx = canvas.getContext('2d')
 
 particlesJS.load('snowCanvas', 'particles.json', () => console.log('loaded'))
 
