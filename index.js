@@ -11,8 +11,8 @@ new fullpage('#fullpage', {
 document.body.addEventListener('dragstart', event => event.preventDefault())
 window.addEventListener('resize', resizeCanvas, false)
 
-canvas = document.getElementById('canvas')
-ctx = canvas.getContext('2d')
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
 
 particlesJS.load('snowCanvas', 'particles.json', () => console.log('loaded'))
 
@@ -80,7 +80,7 @@ const plantCooltime = 40
 const radianCenter = 1.5
 const radianLength = .18
 
-simplex = new SimplexNoise()
+const simplex = new SimplexNoise()
 frame = 0
 
 clouds = []
