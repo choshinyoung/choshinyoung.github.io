@@ -38,7 +38,7 @@ body {
     z-index: -2;
     height: 100%;
     width: 100%;
-    background: linear-gradient(black, #123456)
+    background: linear-gradient(to right, red, orange, yellow, green, blue, navy, purple)
 }
 
 #snowCanvas {

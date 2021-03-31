@@ -9,10 +9,12 @@ new fullpage('#fullpage', {
 })
 
 document.body.addEventListener('dragstart', event => event.preventDefault())
-window.addEventListener('resize', resizeCanvas, false)
+window.addEventListener('resize', resizeCanvas, false);
 
-const canvas = document.getElementById('canvas')
-const ctx = canvas.getContext('2d')
+var canvas = document.getElementById('canvas')
+var ctx = canvas.getContext('2d')
+
+let img_src = ['img/papyrus.jpg'];
 
 particlesJS.load('snowCanvas', 'particles.json', () => console.log('loaded'))
 
@@ -23,7 +25,7 @@ const backgroundTerrainSetting = {
     count: 250, 
     isXAxis: false,
     //color: 'rgb(61,125,0)',
-    color: '#555',
+    color: '#333',
     speed: .002,
 }
 const mainTerrainSetting = {
@@ -74,17 +76,23 @@ const plantSettings = [
         maxSlope: 3,
         chance: .02,
     },
+    {
+        img: 'img/papyrus.jpg',
+        size: [.1, 1],
+        maxSlope: 23,
+        chance: 10,
+    },
 ]
 const plantCooltime = 40
 
 const radianCenter = 1.5
 const radianLength = .18
 
-const simplex = new SimplexNoise()
+simplex = new SimplexNoise()
 frame = 0
 
 clouds = []
-r = random(4, 10)
+r = random(3, 6)
 for(i = 0; i < r; i++) {
     addCloud()
     clouds[clouds.length - 1].pos = random(-375, -600)
@@ -103,8 +111,8 @@ var fc = new FpsCtrl(30, draw)
 fc.start()
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 }
 
 function draw() {
@@ -146,39 +154,9 @@ function drawTerrain(setting) {
         ctx.lineTo(pos.x, pos.y)
     }   
 
-    ctx.lineTo(canvas.width, canvas.height)
+    ctx.lineTo(canvas.width * 2, canvas.height * 2)
     ctx.fillStyle = setting.color
     ctx.fill()
-}
-
-function drawCloud(cloud) {
-    radian = radianStart + radianLength / 100 * cloud.pos * Math.PI
-    radius = canvas.height * 4.5 + cloud.height
-
-    x = Math.floor(centerX + radius * Math.cos(radian))
-    y = Math.floor(centerY + radius * Math.sin(radian))
-
-    ctx.translate(x, y)
-    ctx.rotate(radian + Math.PI / 2)
-
-    s = canvas.height / 1297
-    width = cloud.img.width * cloud.size * s
-    height = cloud.img.height * cloud.size * s
-
-    ctx.filter = 'brightness(' + cloud.brightness + '%) opacity(85%)'
-
-    ctx.drawImage(cloud.img, 0, 0, width, height)
-
-    ctx.filter = 'none'
-
-    ctx.rotate((radian + Math.PI / 2) * -1)
-    ctx.translate(-x, -y)
-
-    cloud.pos += cloud.speed
-    if (cloud.pos < -600) {
-        clouds.splice(i, 1)
-        i--
-    }
 }
 
 function drawPlant(plant) {
@@ -204,7 +182,17 @@ function drawPlant(plant) {
         img = new Image()
         img.src = 'img/tree1-glow.svg'
 
-        ctx.filter = 'brightness(' + (plant.blur) + '%)'
+        ctx.shadowBlur = 30;
+        ctx.shadowColor = "yellow";
+
+        ctx.drawImage(img, -width / 2, -height + 5, width, height)
+
+        ctx.shadowBlur = 0
+        
+        img2 = new Image()
+        img2.src = 'img/tree1-glow2.svg'
+
+        ctx.filter = 'brightness(' + (plant.blur) + '%) opacity(85%)'
         if (plant.isUp == undefined || plant.isUp == false) {
             plant.blur -= .4
             if (plant.blur < 80) {
@@ -218,7 +206,7 @@ function drawPlant(plant) {
             }
         }
 
-        ctx.drawImage(img, Math.floor(-width / 2), Math.floor(-height + 5), width, height)
+        ctx.drawImage(img2, -width / 2, -height + 5, width, height)
 
         ctx.filter = 'none'
     }
@@ -229,6 +217,36 @@ function drawPlant(plant) {
     plant.pos -= .31316
     if(plant.pos <= 0) {
         plants.splice(i, 1)
+        i--
+    }
+}
+
+function drawCloud(cloud) {
+    radian = radianStart + radianLength / 100 * cloud.pos * Math.PI
+    radius = canvas.height * 4.5 + cloud.height
+
+    x = centerX + radius * Math.cos(radian)
+    y = centerY + radius * Math.sin(radian)
+
+    ctx.translate(x, y)
+    ctx.rotate(radian + Math.PI / 2)
+
+    s = canvas.height / 1297
+    width = cloud.img.width * cloud.size * s
+    height = cloud.img.height * cloud.size * s
+
+    ctx.filter = 'brightness(' + cloud.brightness + '%) opacity(85%)'
+
+    ctx.drawImage(cloud.img, 0, 0, width, height)
+
+    ctx.filter = 'none'
+
+    ctx.rotate((radian + Math.PI / 2) * -1)
+    ctx.translate(-x, -y)
+
+    cloud.pos += cloud.speed
+    if (cloud.pos < -600) {
+        clouds.splice(i, 1)
         i--
     }
 }
@@ -254,12 +272,13 @@ function getNoise(x, radius, setting) {
 }
 
 function addCloud() {
+    r = parseInt(random(1, 4))
     clouds.push(newCloud({
-        imgSrc: 'img/cloud' + parseInt(random(1, 4)) + '.svg', 
+        imgSrc: 'img/sans.jpg', 
         brightness: random(90, 100),
         height: random(0, 300), 
         speed: random(-.05, -.125), 
-        size: random(1.5, 4.5),
+        size: random(.25, 1),
     }))
 }
 
@@ -319,21 +338,19 @@ function random(min, max) {
     return Math.random() * (max - min) + min
 }
 
-
-//https://stackoverflow.com/questions/19764018/controlling-fps-with-requestanimationframe
 function FpsCtrl(fps, callback) {
 
-    var delay = 1000 / fps,
-        time = null,
-        frame = -1,
-        tref
+    var delay = 1000 / fps,                               // calc. time per frame
+        time = null,                                      // start time
+        frame = -1,                                       // frame count
+        tref;                                             // rAF time reference
 
     function loop(timestamp) {
-        if (time === null) time = timestamp
-        var seg = Math.floor((timestamp - time) / delay)
-        if (seg > frame) {
-            frame = seg
-            callback({
+        if (time === null) time = timestamp;              // init start time
+        var seg = Math.floor((timestamp - time) / delay); // calc frame no.
+        if (seg > frame) {                                // moved to next frame?
+            frame = seg;                                  // update
+            callback({                                    // callback function
                 time: timestamp,
                 frame: frame
             })
@@ -341,29 +358,32 @@ function FpsCtrl(fps, callback) {
         tref = requestAnimationFrame(loop)
     }
 
-    this.isPlaying = false
+    // play status
+    this.isPlaying = false;
 
+    // set frame-rate
     this.frameRate = function(newfps) {
-        if (!arguments.length) return fps
-        fps = newfps
-        delay = 1000 / fps
-        frame = -1
-        time = null
-    }
+        if (!arguments.length) return fps;
+        fps = newfps;
+        delay = 1000 / fps;
+        frame = -1;
+        time = null;
+    };
 
+    // enable starting/pausing of the object
     this.start = function() {
         if (!this.isPlaying) {
-            this.isPlaying = true
-            tref = requestAnimationFrame(loop)
+            this.isPlaying = true;
+            tref = requestAnimationFrame(loop);
         }
-    }
+    };
 
     this.pause = function() {
         if (this.isPlaying) {
-            cancelAnimationFrame(tref)
-            this.isPlaying = false
-            time = null
-            frame = -1
+            cancelAnimationFrame(tref);
+            this.isPlaying = false;
+            time = null;
+            frame = -1;
         }
     }
 }
