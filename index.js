@@ -80,7 +80,7 @@ const plantSettings = [
         img: 'img/papyrus.jpg',
         size: [.1, 1],
         maxSlope: 23,
-        chance: 15,
+        chance: 10,
     },
 ]
 const plantCooltime = 40
@@ -130,7 +130,7 @@ function draw() {
 
     drawTerrain(mainTerrainSetting)
 
-    if (Math.random() < .003) {
+    if (Math.random() < .005) {
         addCloud()
     }
     for(i = 0; i < clouds.length; i++) {
