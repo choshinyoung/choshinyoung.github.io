@@ -16,7 +16,7 @@ var ctx = canvas.getContext('2d')
 
 let img_src = ['img/papyrus.jpg'];
 
-particlesJS.load('snowCanvas', 'particles.json', () => console.log('loaded'))
+//particlesJS.load('snowCanvas', 'particles.json', () => console.log('loaded'))
 
 const backgroundTerrainSetting = {
     noiseHeight: 3.5, 
@@ -35,7 +35,7 @@ const mainTerrainSetting = {
     count: 200, 
     isXAxis: true, 
     //color: 'rgb(98,202,0)',
-    color: '#fff',
+    color: '#0f0',
     speed: .004,
 }
 
@@ -62,25 +62,25 @@ const plantSettings = [
         img: 'img/tree1.svg',
         size: [2.625, 3.3],
         maxSlope: 1.5,
-        chance: .02,
+        chance: .005,
     },
     {
         img: 'img/snowman.svg',
         size: [1.25, 2],
         maxSlope: 1.5,
-        chance: .0175,
+        chance: .01,
     },
     {
         img: 'img/box.svg',
         size: [1, 2],
         maxSlope: 3,
-        chance: .02,
+        chance: .01,
     },
     {
         img: 'img/papyrus.jpg',
         size: [.1, 1],
         maxSlope: 23,
-        chance: 10,
+        chance: 15,
     },
 ]
 const plantCooltime = 40
