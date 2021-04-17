@@ -1,90 +1,43 @@
 @charset "utf-8";
 
-* {
-    color: white
-}
-
 body {
-    margin: 0;
-    padding: 0;
-}
-
-.section {
+    color: #fff;
     text-align: center;
-    padding-left: 25px;
-    padding-right: 25px;
-}
-
-.section, .slide {
-    text-align: center;
-}
-
-#skillSection, #ProjectSection {
-    background-color: black;
-}
-
-#main h1 {
-    padding-left: .3%;
-}
-
-.slide {
-    line-height: 75px;
+    
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
 #canvas {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: -2;
+    
     height: 100%;
     width: 100%;
-    background: linear-gradient(to right, red, orange, yellow, green, blue, navy, purple)
-}
-
-#snowCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
     z-index: -1;
-    height: 100%;
-    width: 100%;
+
+    background: linear-gradient(#3fa9e6, #a3d2ed)
 }
 
-#debuggerSlide {
-    text-align: center;
+.cloud {
+    position: fixed;
 }
 
-#ProjectSection {
-    font-size: 25px;
+#title {
+    font-size: 20px;
 }
 
-.lineH {
-    line-height: 30px;
+#skill {
+    font-size: 20px;
 }
 
-.lineH img {
-    border-radius: 10px;
-    padding-right: 5px;
+#myName {
+    padding: 5px;
 }
 
-.inlineDisplay {
-    display: inline;
-}
-
-.box {
+.inline {
     display: inline-block;
-    background-color: white;
-    border-radius: 10px;
-    font-size: 35px;
-    line-height: 55px;
-    margin-top: 50px;
-
-    width: 57.5px;
-    height: 57.5px;
-}
-
-.box, .box * {
-    color: black;
 }
 
 .icon {
@@ -109,39 +62,7 @@ body {
     color: #fff;
 }
 
-.fp-controlArrow.fp-next,
-.fp-controlArrow.fp-prev {
-    border-color: transparent;
-
-    width: 34px;
-    height: 80px;
-}
-
-@media screen and (max-width: 1000px) {
-    .fp-controlArrow.fp-next,
-    .fp-controlArrow.fp-prev {
-        display: none;
-    }
-}
-
-.fp-controlArrow.fp-next {
-    right: 45px;
-
-    background: url(img/right_arrow.svg) no-repeat;
-}
-
-.fp-controlArrow.fp-prev {
-    left: 20px;
-
-    background: url(img/left_arrow.svg) no-repeat;
-}
-
-#fp-nav ul li a span, 
-.fp-slidesNav ul li a span {
-    background: white;
-}
-
-#mainSection img, #skillSection img {
+img {
     border-radius: 50%;
     width: 3.5rem;
     vertical-align: middle;
@@ -166,12 +87,12 @@ body {
     padding: 5px 0;
     position: absolute;
     z-index: 1;
-    top: 70px;
-    right: -27.5px;
+    top: 55px;
+    right: -30px;
 }
 
-#ProjectSection .tooltip .tooltip-text {
-    right: -42px;
+.proj .tooltip .tooltip-text {
+    right: -40px;
 }
 
 .tooltip:hover .tooltip-text {
@@ -179,7 +100,50 @@ body {
 }
 
 #skils img {
-    border-radius: 0;
+    border-radius: 0%;
     margin: 0 7px;
     cursor: pointer;
+}
+
+#skill {
+    width: 475px;
+}
+
+#proj_debugger {
+    text-align: center;
+}
+
+.proj {
+    font-size: 25px;
+    width: 500px;
+}
+
+.lineH {
+    line-height: 5px;
+}
+
+.lineH img {
+    border-radius: 10px;
+    padding-right: 5px;
+    padding-bottom: 15px;
+}
+
+.lineH h2 {
+    font-size: 25px;
+}
+
+.box {
+    display: inline-block;
+    background-color: white;
+    border-radius: 10px;
+    font-size: 35px;
+    line-height: 55px;
+    margin-top: 50px;
+
+    width: 57.5px;
+    height: 57.5px;
+}
+
+.box * {
+    color: rgb(59, 59, 59);
 }

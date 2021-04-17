@@ -1,109 +1,76 @@
-new fullpage('#fullpage', {
-    licenseKey: 'asdf',
-    navigation: true,
-    navigationTooltips: ['Main', 'Skill', 'Project'],
-    slidesNavigation: true,
-    scrollingSpeed: 900,
-    css3: false,
-    paddingTop: '50px',
-})
-
-document.body.addEventListener('dragstart', event => event.preventDefault())
-window.addEventListener('resize', resizeCanvas, false);
-
-var canvas = document.getElementById('canvas')
-var ctx = canvas.getContext('2d')
-
-let img_src = ['img/papyrus.jpg'];
-
-//particlesJS.load('snowCanvas', 'particles.json', () => console.log('loaded'))
-
 const backgroundTerrainSetting = {
-    noiseHeight: 3.5, 
-    hilly: 65,
+    noiseHeight: 5, 
+    hilly: .1,
     baseRadius: 4.15, 
     count: 250, 
-    isXAxis: false,
-    //color: 'rgb(61,125,0)',
-    color: '#333',
-    speed: .002,
+    isMain: false,
+    color: '#a3d37e',
+    speed: .001,
 }
 const mainTerrainSetting = {
     noiseHeight: 9, 
-    hilly: 80, 
+    hilly: .5, 
     baseRadius: 3.935, 
-    count: 200, 
-    isXAxis: true, 
-    //color: 'rgb(98,202,0)',
-    color: '#0f0',
+    count: 200,
+    isMain: true,
+    color: '#5e8d5a',
     speed: .004,
 }
 
-const plantSettings = [
+const clouds = [
     {
-        img: 'img/flower1.svg',
-        size: [.675, .9],
-        maxSlope: 4,
-        chance: .005,
+        element: document.getElementById('title'),
+        pos: 30,
     },
     {
-        img: 'img/grass1.svg',
-        size: [.75, 1.35],
-        maxSlope: 2.5,
-        chance: .005,
+        element: document.getElementById('skill'),
+        pos: 265,
     },
     {
-        img: 'img/tree2.svg',
-        size: [2.625, 3.3],
-        maxSlope: 1,
-        chance: .005,
+        element: document.getElementById('proj_debugger'),
+        pos: 500,
     },
     {
-        img: 'img/tree1.svg',
-        size: [2.625, 3.3],
-        maxSlope: 1.5,
-        chance: .005,
+        element: document.getElementById('proj_watermelon'),
+        pos: 675,
     },
     {
-        img: 'img/snowman.svg',
-        size: [1.25, 2],
-        maxSlope: 1.5,
-        chance: .01,
+        element: document.getElementById('proj_olivetoast'),
+        pos: 850,
     },
     {
-        img: 'img/box.svg',
-        size: [1, 2],
-        maxSlope: 3,
-        chance: .01,
+        element: document.getElementById('proj_strawberrydonut'),
+        pos: 1025,
     },
     {
-        img: 'img/papyrus.jpg',
-        size: [.1, 1],
-        maxSlope: 23,
-        chance: 10,
+        element: document.getElementById('proj_andmore'),
+        pos: 1200,
     },
 ]
-const plantCooltime = 40
+
+const plantMinSpace = 5.5
 
 const radianCenter = 1.5
-const radianLength = .18
+const radianLength = .2
+const radianStart = radianCenter - radianLength / 2
 
-simplex = new SimplexNoise()
-frame = 0
+const canvas = document.getElementById('canvas')    
+const ctx = canvas.getContext('2d')
 
-clouds = []
-r = random(3, 6)
-for(i = 0; i < r; i++) {
-    addCloud()
-    clouds[clouds.length - 1].pos = random(-375, -600)
-}
+const simplex = new SimplexNoise()
 
-plants = []
-cooltime = 0
-pr = random(2, 3)
-for(i = 0; i < pr; i++) {
-    addPlant(true)
-}
+position = 0
+
+changedPos = 0
+moveCoolTime = 0
+prvTouch = {pos: 0, time: 0}
+
+cloudSpeed = 1
+
+window.addEventListener('resize', resizeCanvas, false)
+window.addEventListener('mousemove', move)
+window.addEventListener('touchmove', mobileMove)
+window.addEventListener('wheel', scroll)
 
 resizeCanvas()
 
@@ -111,37 +78,62 @@ var fc = new FpsCtrl(30, draw)
 fc.start()
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+}
+
+function move(e) {
+    if (e.buttons == 1) {
+        changedPos = -e.movementX / 1.5
+
+        moveCoolTime = 3
+    }
+}
+
+function mobileMove(e) {
+    if (e.touches.length == 0) return
+
+    now = Date.now()
+    touch = e.touches[0]
+    if (now - prvTouch.time < 15) {
+        changedPos = prvTouch.pos - touch.pageX
+    }
+
+    prvTouch = {pos: touch.pageX, time: now}
+
+    moveCoolTime = 3
+}
+
+function scroll(e) {
+    changedPos = e.deltaY / 7
+
+    moveCoolTime = 5
 }
 
 function draw() {
     canvas.width = canvas.width
 
     centerX = canvas.width / 2
-    centerY = canvas.height * 4.8    
-        
+    centerY = canvas.height * 4.8
+    
     drawTerrain(backgroundTerrainSetting)
 
-    addPlant(false)
-    for (i = 0; i < plants.length; i++) {
-        drawPlant(plants[i])
-    }
+    drawPlant(mainTerrainSetting)
 
     drawTerrain(mainTerrainSetting)
 
-    if (Math.random() < .005) {
-        addCloud()
-    }
-    for(i = 0; i < clouds.length; i++) {
-        drawCloud(clouds[i])
-    }
+    drawCloud()
 
-    frame++
+    position += changedPos
+    changedPos = 0
+
+    if (moveCoolTime <= 0)
+        position++
+    else
+        moveCoolTime--
 }
 
 function drawTerrain(setting) {
-    radianStart = radianCenter - radianLength / 2
     singleRadian = radianLength / setting.count
 
     ctx.beginPath()
@@ -152,102 +144,86 @@ function drawTerrain(setting) {
 
         pos = getPosition(i, radianAngle, setting)
         ctx.lineTo(pos.x, pos.y)
-    }   
+    }
 
-    ctx.lineTo(canvas.width * 2, canvas.height * 2)
+    ctx.lineTo(canvas.width, canvas.height)
     ctx.fillStyle = setting.color
     ctx.fill()
 }
 
-function drawPlant(plant) {
-    radianStart = radianCenter - radianLength / 2
-    singleRadian = radianLength / mainTerrainSetting.count
-    radianAngle = radianStart + singleRadian * plant.pos
+function drawPlant(terrainSetting) {
+    singleRadian = radianLength / terrainSetting.count
 
-    pos = getPosition(plant.pos, radianAngle, mainTerrainSetting)
-    pos.y += 2
-    
     s = canvas.height / 1297
-    width = plant.img.width * plant.size * s
-    height = plant.img.height * plant.size * s
 
-    angle = (radianAngle + .5) * Math.PI + plant.angle
+    space = 0
 
-    ctx.translate(pos.x, pos.y)
-    ctx.rotate(angle)
-    
-    ctx.drawImage(plant.img, -width / 2, -height + 5, width, height)
+    for (i = 0; i < terrainSetting.count; i++) {
+        radianAngle = radianStart + singleRadian * i
 
-    if (plant.img.src.endsWith('img/tree1.svg')) {
+        pos = getPosition(i, radianAngle, terrainSetting)
+
+        x = Math.round((i / terrainSetting.hilly + position) * terrainSetting.speed * 25)
+        seed = (simplex.noise2D(0, x) + 1) / 2
+
+        space++
+        if (seed > .3 || space < plantMinSpace) {
+            continue
+        }
+        space = 0
+
         img = new Image()
-        img.src = 'img/tree1-glow.svg'
 
-        ctx.shadowBlur = 30;
-        ctx.shadowColor = "yellow";
-
-        ctx.drawImage(img, -width / 2, -height + 5, width, height)
-
-        ctx.shadowBlur = 0
-        
-        img2 = new Image()
-        img2.src = 'img/tree1-glow2.svg'
-
-        ctx.filter = 'brightness(' + (plant.blur) + '%) opacity(85%)'
-        if (plant.isUp == undefined || plant.isUp == false) {
-            plant.blur -= .4
-            if (plant.blur < 80) {
-                plant.isUp = true
-            }
+        plantSeed = Math.floor(seed * 10000) % 100
+        if (plantSeed < 30) {
+            img.src = 'img/grass1.svg'
+        }
+        else if (plantSeed < 60) {
+            img.src = 'img/grass2.svg'
         }
         else {
-            plant.blur += .4
-            if (plant.blur > 100) {
-                plant.isUp = false
-            }
+            img.src = 'img/flower1.svg'
         }
 
-        ctx.drawImage(img2, -width / 2, -height + 5, width, height)
+        width = img.width * s
+        height = img.height * s
 
-        ctx.filter = 'none'
-    }
+        angle = (radianAngle + .5) * Math.PI
 
-    ctx.rotate(-angle)
-    ctx.translate(-pos.x, -pos.y)
-    
-    plant.pos -= .31316
-    if(plant.pos <= 0) {
-        plants.splice(i, 1)
-        i--
+        ctx.translate(pos.x, pos.y)
+        ctx.rotate(angle)
+
+        ctx.drawImage(img, -width / 2, -height + 3, width, height)
+
+        ctx.rotate(-angle)
+        ctx.translate(-pos.x, -pos.y)
     }
 }
 
-function drawCloud(cloud) {
-    radian = radianStart + radianLength / 100 * cloud.pos * Math.PI
-    radius = canvas.height * 4.5 + cloud.height
+function drawCloud() {
+    p = position > 0 ? position % 1350 : position
 
-    x = centerX + radius * Math.cos(radian)
-    y = centerY + radius * Math.sin(radian)
+    for (i = 0; i < clouds.length; i++) {
+        c = clouds[i]
 
-    ctx.translate(x, y)
-    ctx.rotate(radian + Math.PI / 2)
+        if (Math.abs(c.pos - p) > 150) {
+            c.element.style.display = 'none'
+            continue
+        }
+        c.element.style.display = ''
 
-    s = canvas.height / 1297
-    width = cloud.img.width * cloud.size * s
-    height = cloud.img.height * cloud.size * s
+        t = p - c.pos
+        pos = -473 - t * (Math.cos(t / 180) * -1 + 1) * 1
 
-    ctx.filter = 'brightness(' + cloud.brightness + '%) opacity(85%)'
+        radian = radianStart + radianLength / 100 * pos * Math.PI
+        radius = canvas.height * 4.6
 
-    ctx.drawImage(cloud.img, 0, 0, width, height)
+        x = centerX + radius * Math.cos(radian)
+        y = centerY + radius * Math.sin(radian)
 
-    ctx.filter = 'none'
-
-    ctx.rotate((radian + Math.PI / 2) * -1)
-    ctx.translate(-x, -y)
-
-    cloud.pos += cloud.speed
-    if (cloud.pos < -600) {
-        clouds.splice(i, 1)
-        i--
+        c.element.style.transform = `rotate(${radian + Math.PI / 2}rad)`
+        c.element.style.left = `${x - c.element.clientWidth / 2}px`
+        c.element.style.top = `${y}px`
     }
 }
 
@@ -266,91 +242,25 @@ function getPosition(x, radianAngle, setting) {
 function getNoise(x, radius, setting) {
     height = canvas.height / setting.noiseHeight
 
-    pos = (x / setting.hilly) + (frame * setting.speed)
+    pos = (x / setting.hilly + position) * setting.speed
 
-    return radius + ((setting.isXAxis ? simplex.noise2D(pos, 0) : simplex.noise2D(0, 100 + pos)) + 1) * height
+    return radius + ((setting.isMain ? simplex.noise2D(pos, 0) : simplex.noise2D(0, 100 + pos)) + 1) * height
 }
 
-function addCloud() {
-    r = parseInt(random(1, 4))
-    clouds.push(newCloud({
-        imgSrc: 'img/sans.jpg', 
-        brightness: random(90, 100),
-        height: random(0, 300), 
-        speed: random(-.05, -.125), 
-        size: random(.25, 1),
-    }))
-}
-
-function newCloud({imgSrc, brightness, height, speed, size}) {
-    img = new Image()
-    img.src = imgSrc
-    pos = -450
-
-    return {img, brightness, pos, height, speed, size}
-}
-
-function addPlant(isInit) {
-    if (isInit || cooltime < 1) {
-        r =  parseInt(random(0, plantSettings.length))
-        if (isInit && r < 3) {
-            addPlant(true)
-            return
-        }
-        setting = plantSettings[r]
-
-        if (isInit || Math.random() <= setting.chance) {
-            x = mainTerrainSetting.count - 1
-            if (isInit)
-                x = random(10, mainTerrainSetting.count - 10)
-
-            pos1 = {x: x, y: getNoise(x, 0, mainTerrainSetting)}
-            pos2 = {x: x + 1, y: getNoise(x + 1, 0, mainTerrainSetting)}
-            
-            bottom = Math.abs(pos2.x - pos1.x)
-            height = Math.abs(pos2.y - pos1.y)
-            slope = height / bottom
-
-            if ((isInit && slope <= .25) || (!isInit && slope <= setting.maxSlope)) {
-                cooltime = plantCooltime
-
-                angle = height / 37.5
-                if (pos1.y < pos2.y)
-                    angle = 2 - angle
-
-                plants.push(newPlant(setting, angle * Math.PI, x))
-            }
-        }
-    }  
-    else {
-        cooltime--
-    }
-}
-
-function newPlant(setting, angle, pos) {
-    img = new Image()
-    img.src = setting.img
-
-    return {pos, img, size: random(setting.size[0], setting.size[1]), angle, blur: 100}
-}
-
-function random(min, max) {
-    return Math.random() * (max - min) + min
-}
-
+//https://stackoverflow.com/questions/19764018/controlling-fps-with-requestanimationframe
 function FpsCtrl(fps, callback) {
 
-    var delay = 1000 / fps,                               // calc. time per frame
-        time = null,                                      // start time
-        frame = -1,                                       // frame count
-        tref;                                             // rAF time reference
+    var delay = 1000 / fps,
+        time = null,
+        frame = -1,
+        tref
 
     function loop(timestamp) {
-        if (time === null) time = timestamp;              // init start time
-        var seg = Math.floor((timestamp - time) / delay); // calc frame no.
-        if (seg > frame) {                                // moved to next frame?
-            frame = seg;                                  // update
-            callback({                                    // callback function
+        if (time === null) time = timestamp
+        var seg = Math.floor((timestamp - time) / delay)
+        if (seg > frame) {
+            frame = seg
+            callback({
                 time: timestamp,
                 frame: frame
             })
@@ -358,32 +268,29 @@ function FpsCtrl(fps, callback) {
         tref = requestAnimationFrame(loop)
     }
 
-    // play status
-    this.isPlaying = false;
+    this.isPlaying = false
 
-    // set frame-rate
     this.frameRate = function(newfps) {
-        if (!arguments.length) return fps;
-        fps = newfps;
-        delay = 1000 / fps;
-        frame = -1;
-        time = null;
-    };
+        if (!arguments.length) return fps
+        fps = newfps
+        delay = 1000 / fps
+        frame = -1
+        time = null
+    }
 
-    // enable starting/pausing of the object
     this.start = function() {
         if (!this.isPlaying) {
-            this.isPlaying = true;
-            tref = requestAnimationFrame(loop);
+            this.isPlaying = true
+            tref = requestAnimationFrame(loop)
         }
-    };
+    }
 
     this.pause = function() {
         if (this.isPlaying) {
-            cancelAnimationFrame(tref);
-            this.isPlaying = false;
-            time = null;
-            frame = -1;
+            cancelAnimationFrame(tref)
+            this.isPlaying = false
+            time = null
+            frame = -1
         }
     }
 }
