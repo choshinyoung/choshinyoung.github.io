@@ -3,24 +3,34 @@ on:
   push:
     branches:
       - master
+  pull-request:
+    branches:
+      - master
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.x]
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - name: Checkout source code
+        uses: actions/checkout@master
+
+      - name: Set up Node.js
+        uses: actions/setup-node@master
         with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install Packages
+          node-version: 16.13.0
+
+      - name: Install dependencies
         run: npm install
+
       - name: Build page
-        run: npm run build
+        run: npm build
+        env:
+          NODE_ENV: production
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
           publish_dir: ./build
