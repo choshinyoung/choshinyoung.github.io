@@ -6,7 +6,7 @@ import './App.css';
 export default function App() {
   return (
     <div className="App">
-      <h1 className="title">TEST</h1>
+      <h1 className="title">CHOSHINYOUNG</h1>
       <div className="icons">
         <Icon link="https://github.com/choshinyoung" icon={faGithub} />
         <Icon link="mailto:choshinyoung1227@gmail.com" icon={faEnvelope} />
